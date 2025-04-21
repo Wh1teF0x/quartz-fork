@@ -1,39 +1,35 @@
-import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
-import legacyStyle from "./styles/legacyToc.scss"
-import modernStyle from "./styles/toc.scss"
-import { classNames } from "../util/lang"
+import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from './types';
+import legacyStyle from './styles/legacyToc.scss';
+import modernStyle from './styles/toc.scss';
+import { classNames } from '../util/lang';
 
 // @ts-ignore
-import script from "./scripts/toc.inline"
-import { i18n } from "../i18n"
-import OverflowListFactory from "./OverflowList"
-import { concatenateResources } from "../util/resources"
+import script from './scripts/toc.inline';
+import { i18n } from '../i18n';
+import OverflowListFactory from './OverflowList';
+import { concatenateResources } from '../util/resources';
 
 interface Options {
-  layout: "modern" | "legacy"
+  layout: 'modern' | 'legacy';
 }
 
 const defaultOptions: Options = {
-  layout: "modern",
-}
+  layout: 'modern',
+};
 
 export default ((opts?: Partial<Options>) => {
-  const layout = opts?.layout ?? defaultOptions.layout
-  const { OverflowList, overflowListAfterDOMLoaded } = OverflowListFactory()
-  const TableOfContents: QuartzComponent = ({
-    fileData,
-    displayClass,
-    cfg,
-  }: QuartzComponentProps) => {
+  const layout = opts?.layout ?? defaultOptions.layout;
+  const { OverflowList, overflowListAfterDOMLoaded } = OverflowListFactory();
+  const TableOfContents: QuartzComponent = ({ fileData, displayClass, cfg }: QuartzComponentProps) => {
     if (!fileData.toc) {
-      return null
+      return null;
     }
 
     return (
-      <div class={classNames(displayClass, "toc")}>
+      <div class={classNames(displayClass, 'toc')}>
         <button
           type="button"
-          class={fileData.collapseToc ? "collapsed toc-header" : "toc-header"}
+          class={fileData.collapseToc ? 'collapsed toc-header' : 'toc-header'}
           aria-controls="toc-content"
           aria-expanded={!fileData.collapseToc}
         >
@@ -53,7 +49,7 @@ export default ((opts?: Partial<Options>) => {
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
-        <OverflowList class={fileData.collapseToc ? "collapsed toc-content" : "toc-content"}>
+        <OverflowList class={fileData.collapseToc ? 'collapsed toc-content' : 'toc-content'}>
           {fileData.toc.map((tocEntry) => (
             <li key={tocEntry.slug} class={`depth-${tocEntry.depth}`}>
               <a href={`#${tocEntry.slug}`} data-for={tocEntry.slug}>
@@ -63,15 +59,15 @@ export default ((opts?: Partial<Options>) => {
           ))}
         </OverflowList>
       </div>
-    )
-  }
+    );
+  };
 
-  TableOfContents.css = modernStyle
-  TableOfContents.afterDOMLoaded = concatenateResources(script, overflowListAfterDOMLoaded)
+  TableOfContents.css = modernStyle;
+  TableOfContents.afterDOMLoaded = concatenateResources(script, overflowListAfterDOMLoaded);
 
   const LegacyTableOfContents: QuartzComponent = ({ fileData, cfg }: QuartzComponentProps) => {
     if (!fileData.toc) {
-      return null
+      return null;
     }
     return (
       <details class="toc" open={!fileData.collapseToc}>
@@ -88,9 +84,9 @@ export default ((opts?: Partial<Options>) => {
           ))}
         </ul>
       </details>
-    )
-  }
-  LegacyTableOfContents.css = legacyStyle
+    );
+  };
+  LegacyTableOfContents.css = legacyStyle;
 
-  return layout === "modern" ? TableOfContents : LegacyTableOfContents
-}) satisfies QuartzComponentConstructor
+  return layout === 'modern' ? TableOfContents : LegacyTableOfContents;
+}) satisfies QuartzComponentConstructor;
