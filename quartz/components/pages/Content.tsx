@@ -6,12 +6,7 @@ const Content: QuartzComponent = ({ fileData, tree }: QuartzComponentProps) => {
   const content = htmlToJsx(fileData.filePath!, tree) as ComponentChildren;
   const classes: string[] = fileData.frontmatter?.cssclasses ?? [];
   const classString = ['popover-hint', ...classes].join(' ');
-  return (
-    <>
-      <div>{JSON.stringify(tree)}</div>
-      <article class={classString}>{content}</article>
-    </>
-  );
+  return <article class={classString}>{content}</article>;
 };
 
 export default (() => Content) satisfies QuartzComponentConstructor;

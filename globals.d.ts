@@ -1,18 +1,20 @@
+/// <reference types="@types/leaflet" />
+
 export declare global {
   interface Document {
     addEventListener<K extends keyof CustomEventMap>(
       type: K,
       listener: (this: Document, ev: CustomEventMap[K]) => void,
-    ): void
+    ): void;
     removeEventListener<K extends keyof CustomEventMap>(
       type: K,
       listener: (this: Document, ev: CustomEventMap[K]) => void,
-    ): void
-    dispatchEvent<K extends keyof CustomEventMap>(ev: CustomEventMap[K] | UIEvent): void
+    ): void;
+    dispatchEvent<K extends keyof CustomEventMap>(ev: CustomEventMap[K] | UIEvent): void;
   }
   interface Window {
-    spaNavigate(url: URL, isBack: boolean = false)
-    addCleanup(fn: (...args: any[]) => void)
-    // TODO: add yaml and leaflet
+    spaNavigate(url: URL, isBack: boolean = false);
+    addCleanup(fn: (...args: any[]) => void);
+    leaflet: typeof L;
   }
 }

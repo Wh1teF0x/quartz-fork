@@ -49,19 +49,24 @@ document.addEventListener('nav', async () => {
       if (!data) {
         return;
       }
-      const formattedData = window.jsyaml.load(data) as string;
-      const jsonData = window.jsyaml.load(formattedData) as Record<string, unknown>;
-      const leafletContainer = document.createElement('div');
-      leafletContainer.id = jsonData.id as string;
-      leafletContainer.innerHTML = 'test';
 
-      const parent = node.parentElement as HTMLElement;
+      const formattedData = window.jsyaml.load(data) as string;
+      const jsonData = window.jsyaml.load(formattedData) as Record<string, unknown> & { id: string; height: string };
+      const leafletContainer = document.createElement('div');
+      leafletContainer.id = jsonData.id;
+      leafletContainer.style.height = jsonData.height;
+
+      const parent = node.parentElement?.parentElement as HTMLElement;
       parent.innerHTML = '';
       parent.appendChild(leafletContainer);
 
-      console.log(window.leaflet);
-      //   leaflet.map(jsonData.id).setView([0, 0]);
+      const map = window.leaflet.map(jsonData.id, { attributionControl: false }).setView([0, 0]);
       console.log('json data', jsonData);
+      // TODO:
+      // объеденить репы 
+      // рисовать картинки 
+      // ставить метки 
+      // gitignore
     }
   }
 
