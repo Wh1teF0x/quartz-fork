@@ -15,6 +15,5 @@ export declare global {
   interface Window {
     spaNavigate(url: URL, isBack: boolean = false);
     addCleanup(fn: (...args: any[]) => void);
-    leaflet: typeof L;
   }
 }

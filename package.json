@@ -98,6 +98,7 @@
     "vfile": "^6.0.3",
     "workerpool": "^9.2.0",
     "ws": "^8.18.1",
+    "yaml": "^2.7.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

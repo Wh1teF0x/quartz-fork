@@ -1,3 +1,29 @@
+import { parseYaml } from '../../util/parseYaml';
+import { FilePath, slugifyFilePath } from '../../util/path';
+
+type LeafletProps = {
+  id: string;
+  height: string;
+  image: FilePath;
+  bounds: L.LatLngBoundsExpression;
+  defaultZoom?: number;
+  maxZoom?: number;
+  marker?: Array<string>;
+  minZoom?: number;
+  unit: string;
+};
+
+function addImageProcess(src: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    let img = new Image();
+    img.onload = function () {
+      resolve({ width: img.width, height: img.height });
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
 document.addEventListener('nav', async () => {
   const center = document.querySelector('.center') as HTMLElement;
   const nodes = center.querySelectorAll('code.leaflet') as NodeListOf<HTMLElement>;
@@ -10,40 +36,6 @@ document.addEventListener('nav', async () => {
   }
 
   async function renderLeaflet() {
-    // de-init any other diagrams
-    // for (const node of nodes) {
-    //   node.removeAttribute("data-processed")
-    //   const oldText = textMapping.get(node)
-    //   if (oldText) {
-    //     node.innerHTML = oldText
-    //   }
-    // }
-    // const computedStyleMap = cssVars.reduce(
-    //   (acc, key) => {
-    //     acc[key] = window.getComputedStyle(document.documentElement).getPropertyValue(key)
-    //     return acc
-    //   },
-    //   {} as Record<(typeof cssVars)[number], string>,
-    // )
-    // const darkMode = document.documentElement.getAttribute("saved-theme") === "dark"
-    // mermaid.initialize({
-    //   startOnLoad: false,
-    //   securityLevel: "loose",
-    //   theme: darkMode ? "dark" : "base",
-    //   themeVariables: {
-    //     fontFamily: computedStyleMap["--codeFont"],
-    //     primaryColor: computedStyleMap["--light"],
-    //     primaryTextColor: computedStyleMap["--darkgray"],
-    //     primaryBorderColor: computedStyleMap["--tertiary"],
-    //     lineColor: computedStyleMap["--darkgray"],
-    //     secondaryColor: computedStyleMap["--secondary"],
-    //     tertiaryColor: computedStyleMap["--tertiary"],
-    //     clusterBkg: computedStyleMap["--light"],
-    //     edgeLabelBackground: computedStyleMap["--highlight"],
-    //   },
-    // })
-    // await mermaid.run({ nodes })
-
     for (const node of nodes) {
       const data = node.getAttribute('data-clipboard') as string;
       if (!data) {
@@ -51,7 +43,7 @@ document.addEventListener('nav', async () => {
       }
 
       const formattedData = window.jsyaml.load(data) as string;
-      const jsonData = window.jsyaml.load(formattedData) as Record<string, unknown> & { id: string; height: string };
+      const jsonData = parseYaml<LeafletProps>(formattedData);
       const leafletContainer = document.createElement('div');
       leafletContainer.id = jsonData.id;
       leafletContainer.style.height = jsonData.height;
@@ -60,12 +52,31 @@ document.addEventListener('nav', async () => {
       parent.innerHTML = '';
       parent.appendChild(leafletContainer);
 
-      const map = window.leaflet.map(jsonData.id, { attributionControl: false }).setView([0, 0]);
+      const map = window.L.map(jsonData.id, { attributionControl: false, ...jsonData }).setView(
+        [0, 0],
+        jsonData.defaultZoom,
+      );
+      const path = slugifyFilePath(jsonData.image);
+      const { width, height } = await addImageProcess(path);
+      const posX = 100;
+      const posY = (100 * width) / height;
+      const image = window.L.imageOverlay(path, [
+        [-posX / 2, -posY / 2],
+        [posX / 2, posY / 2],
+      ]);
+      image.addTo(map);
       console.log('json data', jsonData);
+
+      for (let marker of jsonData?.marker || []) {
+        const [type, px, py, link] = marker.split(',');
+        console.log(type, px, py, link);
+        const m = window.L.marker([Number.parseInt(px, 10), Number.parseInt(py, 10)]).addTo(map);
+        m.on('click', () => window.spaNavigate(link));
+      }
       // TODO:
-      // объеденить репы 
-      // рисовать картинки 
-      // ставить метки 
+      // объеденить репы
+      // правильные ссылки
+      // ставить метки
       // gitignore
     }
   }
