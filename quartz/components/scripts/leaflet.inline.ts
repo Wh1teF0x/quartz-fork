@@ -5,24 +5,13 @@ type LeafletProps = {
   id: string;
   height: string;
   image: FilePath;
-  bounds: L.LatLngBoundsExpression;
+  bounds: [[number, number], [number, number]];
   defaultZoom?: number;
   maxZoom?: number;
   marker?: Array<string>;
   minZoom?: number;
   unit: string;
 };
-
-function addImageProcess(src: string): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    let img = new Image();
-    img.onload = function () {
-      resolve({ width: img.width, height: img.height });
-    };
-    img.onerror = reject;
-    img.src = src;
-  });
-}
 
 document.addEventListener('nav', async () => {
   const center = document.querySelector('.center') as HTMLElement;
@@ -44,6 +33,8 @@ document.addEventListener('nav', async () => {
 
       const formattedData = window.jsyaml.load(data) as string;
       const jsonData = parseYaml<LeafletProps>(formattedData);
+      console.log('json data', jsonData);
+
       const leafletContainer = document.createElement('div');
       leafletContainer.id = jsonData.id;
       leafletContainer.style.height = jsonData.height;
@@ -52,29 +43,25 @@ document.addEventListener('nav', async () => {
       parent.innerHTML = '';
       parent.appendChild(leafletContainer);
 
-      const map = window.L.map(jsonData.id, { attributionControl: false, ...jsonData }).setView(
-        [0, 0],
+      const path = slugifyFilePath(jsonData.image);
+      const posX = jsonData.bounds[1][0] || 100;
+      const posY = jsonData.bounds[1][1] || 100;
+      const map = window.L.map(jsonData.id, { attributionControl: false }).setView(
+        [posX / 2, posY / 2],
         jsonData.defaultZoom,
       );
-      const path = slugifyFilePath(jsonData.image);
-      const { width, height } = await addImageProcess(path);
-      const posX = 100;
-      const posY = (100 * width) / height;
-      const image = window.L.imageOverlay(path, [
-        [-posX / 2, -posY / 2],
-        [posX / 2, posY / 2],
-      ]);
+      map.createPane('base');
+      const image = window.L.imageOverlay(path, jsonData.bounds, { pane: 'base' });
       image.addTo(map);
-      console.log('json data', jsonData);
 
       for (let marker of jsonData?.marker || []) {
-        const [type, px, py, link] = marker.split(',');
-        console.log(type, px, py, link);
-        const m = window.L.marker([Number.parseInt(px, 10), Number.parseInt(py, 10)]).addTo(map);
-        m.on('click', () => window.spaNavigate(link));
+        const [, px, py, link] = marker.split(',');
+        window.L.marker([Number.parseInt(px, 10), Number.parseInt(py, 10)])
+          .addTo(map)
+          .bindPopup(`<a href=${link}>${link}</a>`);
       }
       // TODO:
-      // объеденить репы
+      // объединить репы
       // правильные ссылки
       // ставить метки
       // gitignore
