@@ -1,5 +1,5 @@
 import { parseYaml } from "../../util/parseYaml"
-import { FilePath, FullSlug, slugifyFilePath, transformLink } from "../../util/path"
+import { FilePath, FullSlug, transformLink } from "../../util/path"
 
 type LeafletProps = {
   id: string
