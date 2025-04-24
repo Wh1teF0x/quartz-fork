@@ -2,6 +2,7 @@ import Content from "./pages/Content"
 import TagContent from "./pages/TagContent"
 import FolderContent from "./pages/FolderContent"
 import NotFound from "./pages/404"
+import AliasesList from "./AliasesList"
 import ArticleTitle from "./ArticleTitle"
 import Darkmode from "./Darkmode"
 import ReaderMode from "./ReaderMode"
@@ -25,6 +26,7 @@ import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 
 export {
+  AliasesList,
   ArticleTitle,
   Content,
   TagContent,
