@@ -22,14 +22,7 @@ function initMap(data: LeafletProps, currentSlug: FullSlug, allSlugs: Array<Full
     crs: window.L.CRS.Simple,
   }).setView([posX / 2, posY / 2], data.defaultZoom)
   map.createPane("base")
-  const image = window.L.imageOverlay(
-    path,
-    [
-      [0, 0],
-      [100, 150],
-    ],
-    { pane: "base" },
-  )
+  const image = window.L.imageOverlay(path, data.bounds, { pane: "base" })
   image.addTo(map)
   return map
 }
