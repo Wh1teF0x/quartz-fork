@@ -15,7 +15,6 @@ type LeafletProps = {
 
 function initMap(data: LeafletProps, currentSlug: FullSlug, allSlugs: Array<FullSlug>) {
   const path = transformLink(currentSlug, data.image, { strategy: "shortest", allSlugs: allSlugs })
-  // const path = slugifyFilePath(data.image);
   const posX = data.bounds[1][0] || 100
   const posY = data.bounds[1][1] || 100
   const map = window.L.map(data.id, {
@@ -64,7 +63,7 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
         return
       }
 
-      const formattedData = window.jsyaml.load(data) as string
+      const formattedData = JSON.parse(data)
       const jsonData = parseYaml<LeafletProps>(formattedData)
 
       const leafletContainer = document.createElement("div")

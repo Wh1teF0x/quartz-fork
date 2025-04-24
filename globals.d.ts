@@ -1,5 +1,3 @@
-/// <reference types="@types/leaflet" />
-
 export declare global {
   interface Document {
     addEventListener<K extends keyof CustomEventMap>(

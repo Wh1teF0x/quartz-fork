@@ -788,11 +788,6 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
 
       if (opts.leaflet) {
         js.push({
-          src: "https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js",
-          contentType: "external",
-          loadTime: "beforeDOMReady",
-        })
-        js.push({
           src: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
           contentType: "external",
           loadTime: "beforeDOMReady",
