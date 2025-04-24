@@ -1,3 +1,4 @@
 [submodule "content"]
 	path = content
 	url = https://github.com/Wh1teF0x/dnd-notes
+	branch = main
