@@ -12,5 +12,8 @@ Quartz v4 features a from-the-ground rewrite focusing on end-user extensibility 
 ## Fork by [Wh1teF0x](https://github.com/wh1tef0x)
 Changes:
 - Better config
-- Leaflet plugin
+- [Leaflet plugin](https://github.com/javalent/obsidian-leaflet)
+    - Custom icons
+    - Filter by icon type
+    - Image maps
 - Better yaml parsing

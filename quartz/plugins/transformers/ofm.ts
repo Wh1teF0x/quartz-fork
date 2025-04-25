@@ -1,20 +1,20 @@
-import { QuartzTransformerPlugin } from "../types"
+import { Element, Root as HtmlRoot, Literal } from "hast"
 import {
-  Root,
-  Html,
   BlockContent,
-  PhrasingContent,
-  DefinitionContent,
-  Paragraph,
   Code,
+  DefinitionContent,
+  Html,
+  Paragraph,
+  PhrasingContent,
+  Root,
 } from "mdast"
-import { Element, Literal, Root as HtmlRoot } from "hast"
 import { ReplaceFunction, findAndReplace as mdastFindReplace } from "mdast-util-find-and-replace"
+import path from "path"
 import rehypeRaw from "rehype-raw"
 import { SKIP, visit } from "unist-util-visit"
-import path from "path"
-import { FullSlug, resolveRelative, simplifySlug, splitAnchor } from "../../util/path"
-import { JSResource, CSSResource } from "../../util/resources"
+import { splitAnchor } from "../../util/path"
+import { CSSResource, JSResource } from "../../util/resources"
+import { QuartzTransformerPlugin } from "../types"
 // @ts-ignore
 import calloutScript from "../../components/scripts/callout.inline"
 // @ts-ignore
@@ -23,14 +23,14 @@ import checkboxScript from "../../components/scripts/checkbox.inline"
 import leafletScript from "../../components/scripts/leaflet.inline"
 // @ts-ignore
 import mermaidScript from "../../components/scripts/mermaid.inline"
+import { toHtml } from "hast-util-to-html"
+import { toHast } from "mdast-util-to-hast"
+import fs from "node:fs"
+import { PluggableList } from "unified"
 import leafletStyle from "../../components/styles/leaflet.inline.scss"
 import mermaidStyle from "../../components/styles/mermaid.inline.scss"
-import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
-import { toHast } from "mdast-util-to-hast"
-import { toHtml } from "hast-util-to-html"
 import { capitalize } from "../../util/lang"
-import { PluggableList } from "unified"
-import fs from "node:fs"
+import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
 
 export interface Options {
   comments: boolean
