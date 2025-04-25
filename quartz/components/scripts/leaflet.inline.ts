@@ -1,3 +1,4 @@
+import { Control, DivIcon, Marker } from "leaflet"
 import { parseYaml } from "../../util/parseYaml"
 import { FilePath, FullSlug, transformLink } from "../../util/path"
 
@@ -13,6 +14,12 @@ type LeafletProps = {
   unit: string
 }
 
+type JsonMarker = {
+  type: string
+  iconName: string
+  color: string
+}
+
 function initMap(data: LeafletProps, currentSlug: FullSlug, allSlugs: Array<FullSlug>) {
   const path = transformLink(currentSlug, data.image, { strategy: "shortest", allSlugs: allSlugs })
   const posX = data.bounds[1][0] || 100
@@ -22,24 +29,57 @@ function initMap(data: LeafletProps, currentSlug: FullSlug, allSlugs: Array<Full
     crs: window.L.CRS.Simple,
   }).setView([posX / 2, posY / 2], data.defaultZoom)
   map.createPane("base")
-  const image = window.L.imageOverlay(path, data.bounds, { pane: "base" })
-  image.addTo(map)
-  return map
+  window.L.imageOverlay(path, data.bounds, { pane: "base" }).addTo(map)
+  const layerControl = window.L.control.layers().addTo(map)
+  return { map, layerControl }
+}
+
+function initIcons(markers: Array<JsonMarker>): Record<string, DivIcon> {
+  const icons: Record<string, DivIcon> = {}
+  markers.forEach((marker) => {
+    const icon = window.L.divIcon({
+      html: `<i style="color: ${marker.color}" class="fa fa-${marker.iconName} fa-2x"></i>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      className: "divIcon",
+    })
+    icons[marker.type] = icon
+  })
+  return icons
 }
 
 function positionMarkers(
   map: L.Map,
   data: LeafletProps,
+  icons: Record<string, DivIcon>,
+  layerControl: Control.Layers,
   currentSlug: FullSlug,
   allSlugs: Array<FullSlug>,
 ) {
+  window.L.layerGroup()
+  const markersByType: Record<string, Array<Marker>> = {}
   for (let marker of data?.marker || []) {
-    const [, py, px, link] = marker.split(",")
+    const [type, py, px, link] = marker.split(",")
     const absLink = transformLink(currentSlug, link, { strategy: "shortest", allSlugs: allSlugs })
-    window.L.marker([Number.parseInt(py, 10), Number.parseInt(px, 10)])
+    const options =
+      type !== "default" && icons?.[type]
+        ? {
+            icon: icons[type],
+          }
+        : undefined
+    const mk = window.L.marker([Number.parseInt(py, 10), Number.parseInt(px, 10)], options)
       .addTo(map)
       .bindPopup(`<a href=${absLink}>${link}</a>`)
+    if (!markersByType?.[type]) {
+      markersByType[type] = []
+    }
+    markersByType[type].push(mk)
   }
+  Object.keys(markersByType).forEach((type) => {
+    const layer = window.L.layerGroup(markersByType[type])
+    console.log(type, layer)
+    layerControl.addOverlay(layer, type)
+  })
 }
 
 document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
@@ -56,8 +96,8 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
         return
       }
 
-      const formattedData = JSON.parse(data)
-      const jsonData = parseYaml<LeafletProps>(formattedData)
+      const markers = JSON.parse(node.getAttribute("data-markers") as string)
+      const jsonData = parseYaml<LeafletProps>(JSON.parse(data))
 
       const leafletContainer = document.createElement("div")
       leafletContainer.id = jsonData.id
@@ -67,8 +107,9 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
       parent.innerHTML = ""
       parent.appendChild(leafletContainer)
 
-      const map = initMap(jsonData, currentSlug, allSlugs)
-      positionMarkers(map, jsonData, currentSlug, allSlugs)
+      const { map, layerControl } = initMap(jsonData, currentSlug, allSlugs)
+      const icons = initIcons(markers)
+      positionMarkers(map, jsonData, icons, layerControl, currentSlug, allSlugs)
     }
   }
 

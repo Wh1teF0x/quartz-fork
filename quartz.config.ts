@@ -15,7 +15,7 @@ const config: QuartzConfig = {
     analytics: null,
     locale: "ru-RU",
     baseUrl: "campaing-notes.netlify.app",
-    ignorePatterns: ["private", "templates", ".obsidian", ".scripts"],
+    ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
     theme: {
       fontOrigin: "googleFonts",

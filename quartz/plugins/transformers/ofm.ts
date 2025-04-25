@@ -13,22 +13,24 @@ import { ReplaceFunction, findAndReplace as mdastFindReplace } from "mdast-util-
 import rehypeRaw from "rehype-raw"
 import { SKIP, visit } from "unist-util-visit"
 import path from "path"
-import { splitAnchor } from "../../util/path"
+import { FullSlug, resolveRelative, simplifySlug, splitAnchor } from "../../util/path"
 import { JSResource, CSSResource } from "../../util/resources"
 // @ts-ignore
 import calloutScript from "../../components/scripts/callout.inline"
 // @ts-ignore
 import checkboxScript from "../../components/scripts/checkbox.inline"
 // @ts-ignore
-import leafleatScript from "../../components/scripts/leaflet.inline"
+import leafletScript from "../../components/scripts/leaflet.inline"
 // @ts-ignore
 import mermaidScript from "../../components/scripts/mermaid.inline"
+import leafletStyle from "../../components/styles/leaflet.inline.scss"
 import mermaidStyle from "../../components/styles/mermaid.inline.scss"
 import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
 import { toHast } from "mdast-util-to-hast"
 import { toHtml } from "hast-util-to-html"
 import { capitalize } from "../../util/lang"
 import { PluggableList } from "unified"
+import fs from "node:fs"
 
 export interface Options {
   comments: boolean
@@ -149,6 +151,8 @@ const videoExtensionRegex = new RegExp(/\.(mp4|webm|ogg|avi|mov|flv|wmv|mkv|mpg|
 const wikilinkImageEmbedRegex = new RegExp(
   /^(?<alt>(?!^\d*x?\d*$).*?)?(\|?\s*?(?<width>\d+)(x(?<height>\d+))?)?$/,
 )
+
+const markersFiles: Record<string, unknown> = {}
 
 export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
@@ -532,11 +536,21 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
           return (tree: Root, file) => {
             visit(tree, "code", (node: Code) => {
               if (node.lang === "leaflet") {
+                const markersFilePath = file.data.filePath?.split("/") as Array<string>
+                markersFilePath.length = markersFilePath.length - 1
+                markersFilePath.push("markers.json")
+                const markersFilePathString = markersFilePath.join("/")
+                let markersFile = markersFiles[markersFilePathString]
+                if (!markersFile) {
+                  markersFile = fs.readFileSync(markersFilePathString).toString()
+                  markersFiles[markersFilePathString] = markersFile
+                }
                 file.data.hasLeafletMap = true
                 node.data = {
                   hProperties: {
                     className: ["leaflet"],
                     "data-clipboard": JSON.stringify(node.value),
+                    "data-markers": markersFile as string,
                   },
                 }
               }
@@ -793,13 +807,20 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
           loadTime: "beforeDOMReady",
         })
         js.push({
-          script: leafleatScript,
+          script: leafletScript,
           loadTime: "afterDOMReady",
           contentType: "inline",
           moduleType: "module",
         })
         css.push({
           content: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+        })
+        css.push({
+          content: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css",
+        })
+        css.push({
+          content: leafletStyle,
+          inline: true,
         })
       }
 

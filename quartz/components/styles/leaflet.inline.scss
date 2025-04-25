@@ -1,0 +1,17 @@
+.divIcon {
+  text-align: center;
+  line-height: 20px;
+  background-color: transparent;
+}
+
+.leaflet-control-layers-overlays {
+  background-color: #fff;
+
+  & span {
+    color: black;
+  }
+
+  & input[type="checkbox"] {
+    margin-inline: 0;
+  }
+}
